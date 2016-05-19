@@ -8,6 +8,9 @@ import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 
+import static worthing.product.OfferType.APPLE_ONE_PLUS_ONE;
+import static worthing.product.OfferType.ORANGE_THREE_FOR_TWO;
+
 /**
  * Class responsible for implementing interface methods
  *  - Responsible for calculating product prices
@@ -15,9 +18,9 @@ import java.util.List;
  */
 public class CheckOutServiceImpl implements CheckOutService {
 
-    // this value should be configurable
+    // this value should be configurable either in database or properties file
     private static final BigDecimal APPLE_PRICE = BigDecimal.valueOf(0.60);
-    // this value should be configurable
+    // this value should be configurable either in database or properties file
     private static final BigDecimal ORANGE_PRICE = BigDecimal.valueOf(0.25);
 
 
@@ -56,27 +59,33 @@ public class CheckOutServiceImpl implements CheckOutService {
 
 
     /* Apply special offers available  */
-    private BigDecimal specialOffer(int appleCount, int orangeCount, List<OfferType> offerType) {
+    private BigDecimal specialOffer(int appleCount, int orangeCount, List<OfferType> offerTypes) {
 
+        BigDecimal appleSum = BigDecimal.ZERO;
+        BigDecimal orangeSum = BigDecimal.ZERO;
+        Iterator<OfferType> offerType = offerTypes.iterator();
 
-        BigDecimal appleSum = getOnePlusOneOffer(appleCount);
-
-        System.out.println("Apple sum " + appleSum);
-
-        BigDecimal orangeSum = getThreeForTwoOffer(orangeCount);
-        System.out.println("orange count " + orangeSum);
-
+        switch (offerType.next()){
+            case APPLE_ONE_PLUS_ONE:
+                appleSum = getOnePlusOneOffer(appleCount);
+                break;
+            case ORANGE_THREE_FOR_TWO:
+                orangeSum = getThreeForTwoOffer(orangeCount);
+                break;
+        }
 
         return appleSum.add(orangeSum);
     }
 
     /** Get Three for Two price offer*/
     private BigDecimal getThreeForTwoOffer(int orangeCount) {
-        return BigDecimal.ZERO;
+        return BigDecimal.valueOf(orangeCount % 3).multiply(ORANGE_PRICE)
+                .add(BigDecimal.valueOf(orangeCount / 3).multiply(ORANGE_PRICE).multiply(BigDecimal.valueOf(2)));
     }
 
     /** Get One Plus one price Offer*/
     private BigDecimal getOnePlusOneOffer(int appleCount) {
-        return BigDecimal.ZERO;
+        return BigDecimal.valueOf(appleCount % 2).multiply(APPLE_PRICE)
+                .add(BigDecimal.valueOf(appleCount / 2).multiply(APPLE_PRICE));
     }
 }
