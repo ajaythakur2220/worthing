@@ -11,11 +11,20 @@ public class Product {
 
     private BigDecimal priceInPence;
 
+    /**
+     *
+     * @param productType
+     * @param priceInPence
+     */
     public Product(ProductType productType, BigDecimal priceInPence) {
         this.productType = productType;
         this.priceInPence = priceInPence;
     }
 
+    /**
+     *
+     * @return
+     */
     public ProductType getProductType() {
         return productType;
     }

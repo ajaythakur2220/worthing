@@ -7,10 +7,17 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Interface that defines the method for calculating the total amount for all the products purchased
+ * Interface that defines Check Out services.
  */
 public interface CheckOutService {
 
-    BigDecimal checkOutAmount(List<Product> items, List<OfferType> offers);
+    /**
+     * Calculates the checkout amount
+     * @param items items for which sum to be calculated
+     * @param offers offers available
+     * @return the total amount
+     * @throws ProductNotFoundException exception
+     */
+    BigDecimal checkOutAmount(final List<Product> items, final List<OfferType> offers) throws ProductNotFoundException;
 
 }

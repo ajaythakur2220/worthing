@@ -8,9 +8,6 @@ import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 
-import static worthing.product.OfferType.APPLE_ONE_PLUS_ONE;
-import static worthing.product.OfferType.ORANGE_THREE_FOR_TWO;
-
 /**
  * Class responsible for implementing interface methods
  *  - Responsible for calculating product prices
@@ -18,10 +15,10 @@ import static worthing.product.OfferType.ORANGE_THREE_FOR_TWO;
  */
 public class CheckOutServiceImpl implements CheckOutService {
 
-    // this value should be configurable either in database or properties file
-    private static final BigDecimal APPLE_PRICE = BigDecimal.valueOf(0.60);
-    // this value should be configurable either in database or properties file
-    private static final BigDecimal ORANGE_PRICE = BigDecimal.valueOf(0.25);
+    // Default Value
+    private static BigDecimal APPLE_PRICE = BigDecimal.valueOf(0.60);
+    // Default Value
+    private static BigDecimal ORANGE_PRICE = BigDecimal.valueOf(0.25);
 
 
     /**
@@ -29,23 +26,42 @@ public class CheckOutServiceImpl implements CheckOutService {
      * @param items list of products in cart
      * @param offers Offers to be applied
      * @return the total amount for all the products
+     *  @throws ProductNotFoundException exceptions
      */
-    public BigDecimal checkOutAmount(List<Product> items, List<OfferType> offers) {
+    public BigDecimal checkOutAmount(final List<Product> items, final List<OfferType> offers) throws ProductNotFoundException {
+        if(null == items || items.isEmpty()){
+            throw new IllegalArgumentException(" Item list is empty or null ! ");
+        }
+
         BigDecimal bigDecimal = BigDecimal.ZERO;
         Iterator<Product> itemList = items.iterator();
         int appleCount =0;
         int orangeCount=0;
+        boolean applePriceSet = true;
+        boolean orangePriceSet = true;
 
         while (itemList.hasNext()) {
             Product item = itemList.next();
-            if (item.getProductType().equals(ProductType.APPLE)) {
+            if (ProductType.APPLE.equals(item.getProductType())) {
                 bigDecimal = bigDecimal.add(item.getPriceInPence());
+                //Set the price once
+                if(applePriceSet){
+                    APPLE_PRICE = item.getPriceInPence();
+                    applePriceSet = false;
+
+                }
                 appleCount++;
-            }else if (item.getProductType().equals(ProductType.ORANGE)) {
+
+            } else if (ProductType.ORANGE.equals(item.getProductType())) {
                 bigDecimal = bigDecimal.add(item.getPriceInPence());
+                //Set the price once
+                if(orangePriceSet){
+                    ORANGE_PRICE = item.getPriceInPence();
+                    orangePriceSet = false;
+                }
                 orangeCount++;
             } else {
-               throw new ProuctNotFoundException("Product " + item.getProductType() + " not found");
+               throw new ProductNotFoundException("Product " + item.getProductType() + " not found");
             }
         }
 
@@ -61,19 +77,21 @@ public class CheckOutServiceImpl implements CheckOutService {
     /* Apply special offers available  */
     private BigDecimal specialOffer(int appleCount, int orangeCount, List<OfferType> offerTypes) {
 
+        Iterator<OfferType> offerTypeIterator = offerTypes.iterator();
         BigDecimal appleSum = BigDecimal.ZERO;
         BigDecimal orangeSum = BigDecimal.ZERO;
-        Iterator<OfferType> offerType = offerTypes.iterator();
 
-        switch (offerType.next()){
-            case APPLE_ONE_PLUS_ONE:
-                appleSum = getOnePlusOneOffer(appleCount);
-                break;
-            case ORANGE_THREE_FOR_TWO:
-                orangeSum = getThreeForTwoOffer(orangeCount);
-                break;
+        while (offerTypeIterator.hasNext()) {
+            OfferType offerType = offerTypeIterator.next();
+            switch (offerType) {
+                case APPLE_ONE_PLUS_ONE:
+                    appleSum = getOnePlusOneOffer(appleCount);
+                    break;
+                case ORANGE_THREE_FOR_TWO:
+                    orangeSum = getThreeForTwoOffer(orangeCount);
+                    break;
+            }
         }
-
         return appleSum.add(orangeSum);
     }
 
